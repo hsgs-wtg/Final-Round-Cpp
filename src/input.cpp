@@ -10,10 +10,10 @@ namespace input
 {
     int convert_timestamps(const std::string &timestamp)
     {
-        // 2023-06-01 08:00:00
+        // First timestamp is 2023-06-01 06:00:00
         int day = (timestamp[8] - '0') * 10 + timestamp[9] - '0' - 1;
         int hour = (timestamp[11] - '0') * 10 + timestamp[12] - '0';
-        return day * 24 - hour;
+        return day * 24 - hour - 6;
     }
     template <typename T>
     std::vector<T> eliminate_duplicates(std::vector<T> values)
@@ -30,7 +30,6 @@ namespace input
 class input::dataset
 {
     std::string dataset_code;
-    std::vector<std::vector<int>> pipeline_cardi, pipeline_time;
     std::vector<std::string> employee_codes, pipeline_codes, job_codes;
     std::vector<std::vector<std::vector<int>>> pipeline_candidates;
 
@@ -41,10 +40,13 @@ class input::dataset
     void retrieve_pipeline_time();
     std::vector<int> retrieve_single_pipeline_shift(const std::string &pipeline);
     void add_pipeline_time(std::vector<int> &current_pipeline, int start, int end);
-    dataset(std::string &dataset_code);
+
+    public:
+    dataset(const std::string &dataset_code);
+    std::vector<std::vector<int>> pipeline_cardi, pipeline_time;
 };
 
-input::dataset::dataset(std::string &dataset_code) : dataset_code(dataset_code)
+input::dataset::dataset(const std::string &dataset_code) : dataset_code(dataset_code)
 {
     retrieve_workers();
     retrieve_variables();
