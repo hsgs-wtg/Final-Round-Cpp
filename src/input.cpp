@@ -30,8 +30,8 @@ namespace input
 class input::dataset
 {
     std::string dataset_code;
-    std::vector<std::string> employee_codes, pipeline_codes, job_codes;
     std::vector<std::vector<std::vector<int>>> pipeline_candidates;
+    std::vector<std::string> employee_codes, pipeline_codes, job_codes;
 
     void retrieve_workers();
     void retrieve_variables();
@@ -43,7 +43,9 @@ class input::dataset
 
     public:
     dataset(const std::string &dataset_code);
-    std::vector<std::vector<int>> pipeline_cardi, pipeline_time;
+    std::vector<std::vector<int>> pipeline_cardi;
+    // [shift][pipeline]
+    std::vector<std::vector<int>> pipeline_time;
 };
 
 input::dataset::dataset(const std::string &dataset_code) : dataset_code(dataset_code)
@@ -150,12 +152,18 @@ std::vector<int> input::dataset::retrieve_single_skill(const std::string &pipeli
 
 void input::dataset::retrieve_pipeline_time()
 {
-    pipeline_time.assign(pipeline_codes.size(), std::vector<int>());
+    size_t total_shifts = 0;
+    std::vector<std::vector<int>> pipeline_shift(pipeline_codes.size());
     for (size_t pipeline_id = 0; pipeline_id < pipeline_codes.size(); pipeline_id++)
     {
         const std::string &pipeline = pipeline_codes[pipeline_id];
-        pipeline_time[pipeline_id] = retrieve_single_pipeline_shift(pipeline);
+        pipeline_shift[pipeline_id] = retrieve_single_pipeline_shift(pipeline);
+        total_shifts = std::max(total_shifts, pipeline_shift[pipeline_id].size());
     }
+    pipeline_time.assign(total_shifts, std::vector<int>(pipeline_codes.size()));
+    for (size_t pipeline_id = 0; pipeline_id < pipeline_codes.size(); pipeline_id++)
+        for (size_t shift = 0; shift < pipeline_shift[pipeline_id].size(); shift++)
+            pipeline_time[shift][pipeline_id] = pipeline_shift[pipeline_id][shift];
 }
 
 std::vector<int> input::dataset::retrieve_single_pipeline_shift(const std::string &pipeline)
